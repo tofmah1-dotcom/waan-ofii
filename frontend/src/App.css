@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Poppins:wght@400;600&display=swap');
+
+:root {
+  --primary: #6366f1;
+  --secondary: #a855f7;
+  --bg: #f8fafc;
+  --text-main: #1e293b;
+  --text-sub: #64748b;
+  --white: #ffffff;
+}
+
+body {
+  background-color: var(--bg);
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  color: var(--text-main);
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Header Section */
+.main-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.logo {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 3rem;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--text-sub);
+  font-size: 1rem;
+}
+
+/* Form Styling - Telegram Input Style */
+.form-section {
+  background: var(--white);
+  padding: 25px;
+  border-radius: 20px;
+  margin-bottom: 40px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.post-form h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: var(--primary);
+}
+
+.post-form input, .post-form textarea {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 2px solid #f1f5f9;
+  border-radius: 12px;
+  font-family: inherit;
+  box-sizing: border-box;
+  background: #fcfdfe;
+}
+
+.post-form input:focus, .post-form textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--white);
+}
+
+.file-input {
+  border: none !important;
+  padding: 5px 0 !important;
+  font-size: 0.85rem;
+  color: var(--text-sub);
+}
+
+.submit-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: 0.3s;
+}
+
+.submit-btn:hover {
+  background: var(--secondary);
+  transform: translateY(-2px);
+}
+
+/* Post Card Styling - Social Media Look */
+.post-card {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.post-layout {
+  display: flex;
+  gap: 15px;
+}
+
+.profile-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+}
+
+.content-section {
+  flex: 1;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.post-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: 0.2s;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.post-text {
+  margin: 10px 0;
+  line-height: 1.5;
+  color: #334155;
+}
+
+/* Post Image */
+.post-content-img {
+  width: 100%;
+  max-height: 400px;
+  border-radius: 15px;
+  object-fit: cover;
+  margin-top: 10px;
+}
+
+.meta-footer {
+  margin-top: 12px;
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Loader */
+.loader {
+  text-align: center;
+  padding: 50px;
+  font-weight: 600;
+  color: var(--primary);
+}

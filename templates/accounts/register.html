@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Waan-ofii | Register</title>
+</head>
+<body style="font-family:sans-serif; background:#e5ddd5; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;">
+    <div style="background:white; padding:30px; border-radius:10px; width:350px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h2 style="color:#075e54; text-align:center;">Account Uumi</h2>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" style="width:100%; background:#075e54; color:white; padding:10px; border:none; border-radius:5px; cursor:pointer;">
+                Account Uumi
+            </button>
+        </form>
+        <div style="text-align:center; margin-top:15px;">
+            Account qabda? <a href="/accounts/login/" style="color:#075e54;">Login jedhi</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>Profile | Waan-ofii</title></head>
+<body style="font-family: sans-serif; background: #e5ddd5; display: flex; justify-content: center; padding: 20px;">
+    <div style="background: white; padding: 20px; border-radius: 10px; width: 400px; text-align: center;">
+        <img src="{{ user.profile.image.url }}" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid #075e54;">
+        <h2>{{ user.username }}</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ u_form.as_p }}
+            {{ p_form.as_p }}
+            <button type="submit" style="background: #075e54; color: white; padding: 10px; width: 100%; border: none; border-radius: 5px; cursor: pointer;">Haaromsi</button>
+        </form>
+        <br>
+        <a href="/">Gara Chat-itti deebi'i</a>
+    </div>
+</body>
+</html>

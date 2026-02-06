@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="om">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waan-ofii - Bakka Filannoo</title>
+    <style>
+        body { font-family: sans-serif; background-color: #e5ddd5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; width: 300px; }
+        h2 { color: #075e54; }
+        input { width: 100%; padding: 12px; margin: 20px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #25d366; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Kutaa Chat Filadhu</h2>
+        <input id="room-name-input" type="text" placeholder="Maqaa kutaa...">
+        <button id="room-name-submit">Seeni</button>
+    </div>
+
+    <script>
+       document.querySelector('#room-name-submit').onclick = function(e) {
+    var roomName = document.querySelector('#room-name-input').value;
+    if (roomName) {
+        // Space balleessuu: 'tofiko mahammed' -> 'tofiko_mahammed'
+        var cleanRoomName = roomName.trim().replace(/\s+/g, '_');
+        
+        // MAALOO KANA ILAALI: '/chat/' dabalamaa jira
+        window.location.pathname = '/chat/' + cleanRoomName + '/';
+    } else {
+        alert("Maaloo maqaa room-ii galchi!");
+    }
+};
+    </script>
+</body>
+</html>

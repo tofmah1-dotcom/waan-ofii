@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Waan-ofii Lobby</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #e5ddd5; }
+        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        input { padding: 10px; width: 200px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; background: #075e54; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>Maqaa Garee Gali</h3>
+        <input id="room-name-input" type="text" placeholder="Fakkeenya: oromia">
+        <button id="room-name-submit">Seeni</button>
+    </div>
+
+    <script>
+        document.querySelector('#room-name-submit').onclick = function(e) {
+            var roomName = document.querySelector('#room-name-input').value;
+            if (roomName) {
+                window.location.pathname = '/chat/' + roomName + '/';
+            } else {
+                alert("Maaloo maqaa garee barreessi!");
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="om">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oduu Haaraa Maxxansi</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; }
+        .form-container { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #075e54; text-align: center; }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        
+        .voice-section { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px dashed #075e54; text-align: center; margin: 15px 0; }
+        .btn-record { background: #075e54; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .recording { background: #e91e63; animation: pulse 1.5s infinite; }
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        
+        #submit-btn { background: #25d366; color: white; border: none; width: 100%; padding: 15px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        #audio-preview { width: 100%; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Oduu Haaraa Barreessi</h2>
+    <form id="post-form">
+        <input type="text" id="title" placeholder="Mata-duree Oduu" required>
+        <textarea id="content" rows="6" placeholder="Qabiyyee oduu asitti barreessi..." required></textarea>
+        
+        <label>Suuraalee (Baay'ee filachuu dandeessa):</label>
+        <input type="file" id="images" multiple accept="image/*">
+
+        <div class="voice-section">
+            <p>🎙️ Oduu kana afaaniin waraabi:</p>
+            <button type="button" id="record-btn" class="btn-record">Waraabuu Jalqabi</button>
+            <p id="record-status" style="font-size: 13px; color: #666;"></p>
+            <audio id="audio-preview" controls></audio>
+        </div>
+
+        <button type="submit" id="submit-btn">MAXXANSI ODUU</button>
+    </form>
+</div>
+
+<script>
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioBlob = null;
+
+    const recordBtn = document.getElementById('record-btn');
+    const statusText = document.getElementById('record-status');
+    const audioPreview = document.getElementById('audio-preview');
+
+    // 1. Logic Waraabaa (Audio Recording)
+    recordBtn.addEventListener('click', async () => {
+        if (!mediaRecorder || mediaRecorder.state === "inactive") {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+                    audioPreview.src = URL.createObjectURL(audioBlob);
+                    audioPreview.style.display = 'block';
+                    statusText.innerText = "Waraabamee qophaa'eera ✅";
+                    recordBtn.innerText = "Deebisii Waraab";
+                    recordBtn.classList.remove('recording');
+                };
+
+                mediaRecorder.start();
+                recordBtn.innerText = "Dhaabi (Waraabaa jira...)";
+                recordBtn.classList.add('recording');
+                statusText.innerText = "Sagalee kee dhageessisaa jirta...";
+            } catch (err) {
+                alert("Microphone banuuf hayyama kennaa!");
+            }
+        } else {
+            mediaRecorder.stop();
+        }
+    });
+
+    // 2. Form Erguu (Submit Logic)
+    document.getElementById('post-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Maxxanfamaa jira...";
+
+        const formData = new FormData();
+        formData.append('title', document.getElementById('title').value);
+        formData.append('content', document.getElementById('content').value);
+        
+        // Suuraalee fe'uu
+        const imageFiles = document.getElementById('images').files;
+        for (let i = 0; i < imageFiles.length; i++) {
+            formData.append('uploaded_images', imageFiles[i]);
+        }
+
+        // Saagalee waraabame dabaluu
+        if (audioBlob) {
+            formData.append('voice_audio', audioBlob, 'voice_news.mp3');
+        }
+
+        const response = await fetch('/blog/posts/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+
+        if (response.ok) {
+            alert("Oduun milkaa'inaan maxxanfameera! ✅");
+            window.location.href = "/blog/"; 
+        } else {
+            alert("Dogoggorri uumameera. Maaloo deebisii yaali.");
+            submitBtn.disabled = false;
+            submitBtn.innerText = "MAXXANSI ODUU";
+        }
+    };
+</script>
+
+</body>
+</html>
