@@ -1,16 +1,26 @@
 import os
-import django # KANA DABALADHU
+import django
 from django.core.asgi import get_asgi_application
+
+# 1. OS environment jalqaba qindeessi
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+
+# 2. Django Setup jalqaba haa hojjetu
+django.setup()
+
+# 3. HTTP application uumi
+django_asgi_app = get_asgi_application()
+
+# 4. Channels imports Setup booda ta'uu qabu
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings') # 'DJANGO_SETTINGS_MODULE' qubee gurguddaan
-django.setup() # KANA DABALADHU
-
-import chat.routing # Import kana django.setup() booda ta'uu qaba
+import chat.routing 
 
 application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
+    # HTTP requests
+    "http": django_asgi_app,
+    
+    # WebSocket requests
     "websocket": AuthMiddlewareStack(
         URLRouter(
             chat.routing.websocket_urlpatterns

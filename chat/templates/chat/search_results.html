@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="om">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bu'aa Barbaachaa - Waan-ofii</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .result-card { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 450px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .result-card h3 { margin-top: 0; color: #333; font-size: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        
+        h4 { color: #075e54; margin: 20px 0 10px 0; display: flex; align-items: center; gap: 8px; }
+        
+        .item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 8px; transition: background 0.3s; border-bottom: 1px solid #f9f9f9; }
+        .item:hover { background: #f7f9f9; }
+        
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 35px; height: 35px; background: #075e54; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; }
+        
+        .btn { text-decoration: none; background: #075e54; color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; transition: background 0.2s; }
+        .btn:hover { background: #128c7e; }
+        .btn-group { background: #34b7f1; }
+        .btn-group:hover { background: #00a5f4; }
+        
+        .empty-msg { color: #888; font-style: italic; font-size: 14px; padding-left: 10px; }
+        .back-link { display: inline-block; margin-top: 25px; color: #075e54; text-decoration: none; font-size: 14px; font-weight: 500; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="result-card">
+        <h3>Bu'aa Barbaachaa: "{{ query }}"</h3>
+        
+        <h4>👤 Namoota</h4>
+        {% for user in users %}
+            <div class="item">
+                <div class="user-info">
+                    <div class="avatar">{{ user.username|slice:":1"|upper }}</div>
+                    <span>{{ user.username }}</span>
+                </div>
+               <a href="{% url 'chat:start_private_chat' user.id %}" class="btn">Haasa'i</a>
+            </div>
+        {% empty %}
+            <p class="empty-msg">Namni maqaa kanaan argame hin jiru.</p>
+        {% endfor %}
+
+        <h4>👥 Gareewwan</h4>
+        {% for group in groups %}
+            <div class="item">
+                <div class="user-info">
+                    <span>{{ group.group_name }}</span>
+                </div>
+                <a href="{% url 'chat:group_room' group.id %}" class="btn btn-group">Seeni</a>
+            </div>
+        {% empty %}
+            <p class="empty-msg">Garee maqaa kanaan argame hin jiru.</p>
+        {% endfor %}
+        
+        <a href="{% url 'chat:lobby' %}" class="back-link">← Gara Lobby deebi'i</a>
+    </div>
+</body>
+</html>

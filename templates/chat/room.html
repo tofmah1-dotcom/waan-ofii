@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAAN-OFII - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f7f6; }
+        .navbar { background-color: #007bff; }
+        .btn-chat { background-color: #25d366; color: white; border-radius: 20px; transition: 0.3s; }
+        .btn-chat:hover { background-color: #128c7e; color: white; transform: scale(1.05); }
+        .hero-section { padding: 60px 0; text-align: center; background: white; margin-bottom: 30px; border-radius: 0 0 50px 50px; shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-3" href="/">WAAN-OFII</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a href="{% url 'chat:lobby' %}" class="btn btn-chat btn-sm px-4 me-3">
+                            <i class="fab fa-whatsapp"></i> Ergaa (Chat)
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white fw-bold" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><a class="dropdown-item" href="{% url 'account_logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'account_login' %}">Login</a></li>
+                    <li class="nav-item"><a class="btn btn-light btn-sm ms-2" href="{% url 'account_signup' %}">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="hero-section">
+    <div class="container">
+        <h1 class="display-4 fw-bold text-primary">Baga Gara WAAN-OFII Nagaan Dhufte!</h1>
+        <p class="lead text-muted">Bakka itti barattu, posts adda addaa dubbiftu fi hiriyoota kee waliin haasoftu.</p>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg px-5">Barreeffama Jalqabi</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <h3 class="mb-4"><i class="fas fa-newspaper text-primary"></i> Baay'ee Kan Dubbifaman</h3>
+            <div class="row">
+                {% for post in posts %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">{{ post.title }}</h5>
+                                <p class="card-text text-muted">{{ post.content|truncatechars:100 }}</p>
+                                <a href="#" class="btn btn-outline-primary btn-sm">Dubbisi...</a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-center text-muted">Hammaaf barreeffamni tokkollee hin jiru.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <h3 class="mb-4"><i class="fas fa-graduation-cap text-success"></i> Koorsiiwwan</h3>
+            <div class="list-group shadow-sm">
+                {% for course in courses %}
+                    <a href="#" class="list-group-item list-group-item-action border-0 mb-1 rounded">
+                        {{ course.title }}
+                    </a>
+                {% empty %}
+                    <div class="list-group-item text-muted">Koorsiiwwan hin jiran.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    // Fakkeenya: Yeroo namni "Chat" cuqaasu ergaa nagaa gabaabaa agarsiisuuf
+    document.querySelector('.btn-chat').addEventListener('click', function() {
+        console.log("Gara kutaa haasaa (Chat Room) deemaa jirta...");
+    });
+
+    // Mobile irratti navbar nagaatti akka cufamuuf
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            const navbar = document.querySelector('.navbar-collapse');
+            if (navbar.classList.contains('show')) {
+                new bootstrap.Collapse(navbar).hide();
+            }
+        });
+    });
+</script>
+</body>
+</html>

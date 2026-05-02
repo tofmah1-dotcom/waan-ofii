@@ -1,0 +1,24 @@
+{% extends 'home.html' %} {% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="display-4">{{ course.title }}</h1>
+            <p class="lead text-muted">{{ course.description }}</p>
+            <hr>
+            <h3>Barnoota Koorsii Kanaa</h3>
+            <div class="list-group">
+                {% for lesson in lessons %}
+                <div class="list-group-item">
+                    <h5>{{ lesson.order }}. {{ lesson.title }}</h5>
+                    {% if lesson.video_url %}
+                        <a href="{{ lesson.video_url }}" class="btn btn-danger btn-sm">Viidiyoo Ilaali</a>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p>Barnoonni koorsii kanaaf hin dabalamne.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

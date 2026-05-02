@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Beeksisa</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .notif-card { background: white; padding: 20px; border-radius: 10px; width: 450px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .notif-item { padding: 15px; border-left: 4px solid #075e54; background: #f9f9f9; margin-bottom: 10px; border-radius: 0 5px 5px 0; }
+        .time { font-size: 11px; color: gray; display: block; }
+    </style>
+</head>
+<body>
+    <div class="notif-card">
+        <h3>Beeksisa Kee</h3>
+        {% for notif in notifications %}
+            <div class="notif-item">
+                {% if notif.message %}
+                    <strong>{{ notif.message.user.username }}</strong> ergaa dhuunfaa siif ergeera.
+                    <a href="{% url 'chat:room' notif.message.user.username %}">Dabalataaf</a>
+                {% elif notif.group_message %}
+                    Garee <strong>{{ notif.group_message.group.group_name }}</strong> keessatti ergaan haaraa jira.
+                    <a href="{% url 'chat:group_room' notif.group_message.group.id %}">Dabalataaf</a>
+                {% endif %}
+                <span class="time">{{ notif.timestamp|timesince }} dura</span>
+            </div>
+        {% empty %}
+            <p>Beeksisi haaraa hin jiru.</p>
+        {% endfor %}
+        <br>
+        <a href="{% url 'chat:lobby' %}" style="color: gray; text-decoration: none;">← Gara Lobby deebi'i</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="om">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ group.group_name }} - Waan-ofii</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background-color: #e5ddd5; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        .header { background: #075e54; color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; }
+        .members-bar { background: #f9f9f9; padding: 5px 15px; border-bottom: 1px solid #ddd; overflow-x: auto; white-space: nowrap; }
+        .chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        
+        .message { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); word-wrap: break-word; }
+        .sent { align-self: flex-end; background: #dcf8c6; border-bottom-right-radius: 2px; }
+        .received { align-self: flex-start; background: white; border-bottom-left-radius: 2px; }
+        .sender-name { font-size: 11px; font-weight: bold; color: #075e54; display: block; margin-bottom: 3px; }
+
+        .media-content { max-width: 100%; border-radius: 8px; margin-top: 5px; cursor: pointer; }
+        
+        .input-area { background: #f0f0f0; padding: 10px; display: flex; align-items: center; gap: 10px; }
+        input[type="text"] { flex: 1; padding: 12px; border: none; border-radius: 25px; outline: none; }
+        .action-btn { background: none; border: none; color: #555; font-size: 20px; cursor: pointer; }
+        .btn-send { background: #075e54; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="display:flex; align-items:center;">
+            <a href="{% url 'chat:lobby' %}" style="color: white; text-decoration: none; margin-right: 15px; font-size: 20px;">⬅</a>
+            <div>
+                <b style="font-size: 16px;">{{ group.group_name }}</b><br>
+                <small id="member-count">{{ group.members.count }} miseensota</small>
+            </div>
+        </div>
+        <i class="fas fa-ellipsis-v"></i>
+    </div>
+
+    <div class="members-bar">
+        <small><b>Miseensota:</b> {% for m in group.members.all %}{{ m.username }}{% if not forloop.last %}, {% endif %}{% endfor %}</small> 
+    </div>
+
+    <div class="chat-box" id="chat-log">
+        {% for m in messages %}
+            <div class="message {% if m.user == request.user %}sent{% else %}received{% endif %}">
+                <span class="sender-name">{{ m.user.username }}</span>
+                {{ m.content }}
+                {% if m.image %}<img src="{{ m.image.url }}" class="media-content" onclick="window.open(this.src)">{% endif %}
+                {% if m.audio %}<audio controls class="media-content"><source src="{{ m.audio.url }}"></audio>{% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <input type="file" id="image-input" style="display:none;" accept="image/*">
+    <input type="file" id="audio-input" style="display:none;" accept="audio/*">
+
+    <div class="input-area">
+        <button class="action-btn" onclick="document.getElementById('image-input').click()"><i class="fas fa-image"></i></button>
+        <button class="action-btn" onclick="document.getElementById('audio-input').click()"><i class="fas fa-microphone"></i></button>
+        <input type="text" id="chat-message-input" placeholder="Ergaa barreessi..." autocomplete="off">
+        <button id="btn-send" class="btn-send"><i class="fas fa-paper-plane"></i></button>
+    </div>
+
+    <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"></audio>
+
+    {{ group.id|json_script:"group-id" }}
+
+    <script>
+        const groupId = JSON.parse(document.getElementById('group-id').textContent);
+        const chatLog = document.querySelector('#chat-log');
+        const currentUser = "{{ request.user.username }}";
+        
+        chatLog.scrollTop = chatLog.scrollHeight;
+
+        const chatSocket = new WebSocket((window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws/chat/group/' + groupId + '/');
+
+        chatSocket.onmessage = function(e) {
+            const eventData = JSON.parse(e.data);
+            const data = eventData.payload || eventData; // Compatibility check
+            const sender = eventData.sender_username || data.username;
+
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message');
+            msgDiv.classList.add(sender === currentUser ? 'sent' : 'received');
+            
+            let content = `<span class="sender-name">${sender}</span>${data.message || ''}`;
+            if (data.image) content += `<img src="${data.image}" class="media-content" onclick="window.open(this.src)">`;
+            if (data.audio) content += `<audio controls class="media-content"><source src="${data.audio}"></audio>`;
+            
+            msgDiv.innerHTML = content;
+            chatLog.appendChild(msgDiv);
+            chatLog.scrollTop = chatLog.scrollHeight;
+
+            if (sender !== currentUser) {
+                document.getElementById('notif-sound').play().catch(e => console.log("Sound error:", e));
+            }
+        };
+
+        // Multimedia Upload Function
+        function uploadMedia(file, type) {
+            const formData = new FormData();
+            formData.append(type, file);
+            formData.append('room_name', groupId);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+            fetch('/chat/upload_media/', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(resData => {
+                if(resData.status === 'success') {
+                    chatSocket.send(JSON.stringify({
+                        'message': '',
+                        'username': currentUser,
+                        'image': type === 'image' ? resData.url : '',
+                        'audio': type === 'audio' ? resData.url : ''
+                    }));
+                }
+            });
+        }
+
+        document.getElementById('image-input').onchange = e => uploadMedia(e.target.files[0], 'image');
+        document.getElementById('audio-input').onchange = e => uploadMedia(e.target.files[0], 'audio');
+
+        document.querySelector('#btn-send').onclick = function() {
+            const input = document.querySelector('#chat-message-input');
+            if (input.value.trim() !== "") {
+                chatSocket.send(JSON.stringify({ 'message': input.value, 'username': currentUser }));
+                input.value = '';
+            }
+        };
+    </script>
+</body>
+</html>

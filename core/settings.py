@@ -3,26 +3,34 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# MURTEESSAADHA: Gabaa irratti 'django-insecure' kana jijjiiruu qabda
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here')
 
-# Gabaa irratti False godhi
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-# 1. ALLOWED HOSTS: Namni hundi akka si arguuf
-ALLOWED_HOSTS = ['*', '.railway.app', 'localhost', '127.0.0.1']
+# --- 1. MOOBAAYILAAF IP HAARAA ASITTI DABALAMEERA ---
+# IP address 10.153.116.198 lakkofsa 'ipconfig' irraa argatte sana dha
+ALLOWED_HOSTS = ['10.153.116.198', '127.0.0.1', 'localhost', '*', '.railway.app']
 
-# 2. CSRF TRUSTED ORIGINS: Silkii irraa upload gochuuf dirqama
-CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+# --- 2. CSRF SETTINGS (Moobaayilaan Login akka siif hojjetuuf) ---
+CSRF_TRUSTED_ORIGINS = [
+    'http://10.153.116.198:8000', 
+    'https://*.railway.app'
+]
+
+# ASGI & WSGI
+ASGI_APPLICATION = 'core.asgi.application'
+WSGI_APPLICATION = 'core.wsgi.application'
 
 INSTALLED_APPS = [
-    'daphne', # ASGI server jalqaba irratti jiraachuu qaba
+    'daphne', 
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     
     # Apps kee
     'accounts',
@@ -31,8 +39,7 @@ INSTALLED_APPS = [
     'chat',
     'education',
 
-    # Allauth apps
-    'django.contrib.sites',
+    # Allauth
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -46,12 +53,9 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-ASGI_APPLICATION = 'core.asgi.application'
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Static files-iif dabalame
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -79,8 +83,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'core.wsgi.application'
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -88,55 +90,38 @@ DATABASES = {
     }
 }
 
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
-
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
-
-# Static & Media Files Settings
+# --- 3. STATIC & MEDIA FILES (Mobile irratti akka mul'atan) ---
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Whitenoise static storage
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = '/chat/' 
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
-# Channels settings
-if os.environ.get('REDIS_URL'):
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [os.environ.get('REDIS_URL')],
-            },
-        },
-    }
-else:
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer",
-        },
-    }
+# --- 4. CHANNELS SETTINGS (WebSocket Mobile-f) ---
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     )
-}STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+}
+
+# --- 5. DHUMA IRRATTI SARARA ATI JETTUN DABALAMEERA ---
+ALLOWED_HOSTS = [
+    'tofiqo.pythonanywhere.com', 
+    '127.0.0.1', 
+    'localhost', 
+    '10.153.116.198'  # IP address moobaayila keetiis itti dabalii dhiisi
+]

@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="alert alert-warning border-dark shadow-sm">
+        <h5 class="fw-bold"><i class="fas fa-bug"></i> DEBUG MODE</h5>
+        <hr>
+        <p class="mb-1"><strong>Lakkoofsa Oduu (Database):</strong> {{ posts.paginator.count|default:"0" }}</p>
+        <p class="mb-1"><strong>Oduu Fuula kanaa:</strong> {{ posts|length }}</p>
+        <p class="mb-0"><strong>Data dhufaa jiru:</strong> <code class="text-danger">{{ posts }}</code></p>
+    </div>
+</div>
+
+<div class="py-5 text-center bg-primary text-white mb-5 shadow-sm" style="background: linear-gradient(45deg, #007bff, #6610f2);">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Waan-ofii Blog</h1>
+        <p class="lead">Oduuwwan ammayyaa fi tajaajiloota keenya asitti argattu.</p>
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6">
+                <form action="{% url 'blog:post_list' %}" method="GET" class="d-flex shadow-sm">
+                    <input type="text" name="q" class="form-control me-2" placeholder="Oduu barbaadi..." value="{{ search_query|default:'' }}">
+                    <button class="btn btn-light text-primary fw-bold" type="submit">Barbaadi</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-white fw-bold text-primary">
+                    <i class="fas fa-list"></i> Gosa Oduu
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'blog:post_list' %}" class="list-group-item list-group-item-action {% if not request.GET.category %}active{% endif %}">Hunda</a>
+                    {% for cat in categories %}
+                        <a href="{% url 'blog:post_list' %}?category={{ cat.slug }}" 
+                           class="list-group-item list-group-item-action {% if request.GET.category == cat.slug %}active{% endif %}">
+                            {{ cat.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="row">
+                {% for post in posts %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-0 shadow-sm post-card">
+                            {% if post.images.all %}
+                                <img src="{{ post.images.all.0.image.url }}" class="card-img-top" style="height: 220px; object-fit: cover;" alt="{{ post.title }}">
+                            {% else %}
+                                <div class="bg-light text-center py-5">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="badge bg-info text-white px-2 py-1">{{ post.category.name|default:"General" }}</span>
+                                    <small class="text-muted"><i class="fas fa-clock"></i> {{ post.created_at|timesince }} dura</small>
+                                </div>
+                                <h5 class="card-title fw-bold text-dark">{{ post.title }}</h5>
+                                <p class="card-text text-muted">{{ post.content|truncatewords:15 }}</p>
+                            </div>
+                            
+                            <div class="card-footer bg-white border-0 pb-3">
+                                <a href="{% url 'blog:post_detail' post.slug %}" class="btn btn-outline-primary w-100 fw-bold">Dubbisi</a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12 text-center py-5 bg-white shadow-sm rounded">
+                        <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                        <h3 class="text-muted">Oduun tokkollee hin argamne!</h3>
+                        <p>Maaloo database kee irratti oduu uumuu kee mirkaneeffadhu.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if posts.has_other_pages %}
+            <nav class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if posts.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link shadow-sm" href="?page={{ posts.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Dura</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active"><span class="page-link shadow-sm">{{ posts.number }}</span></li>
+                    
+                    {% if posts.has_next %}
+                        <li class="page-item">
+                            <a class="page-link shadow-sm" href="?page={{ posts.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Itti Aanu</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .post-card { transition: all 0.3s ease; border-radius: 15px; overflow: hidden; }
+    .post-card:hover { transform: translateY(-8px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+    .pagination .page-link { border-radius: 5px; margin: 0 3px; color: #6610f2; }
+    .pagination .active .page-link { background: #6610f2; border-color: #6610f2; }
+</style>
+{% endblock %}

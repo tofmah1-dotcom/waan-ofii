@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="om">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oduu Haaraa Maxxansi | Waan-Ofii</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .main-card { border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-top: 50px; margin-bottom: 50px; }
+        .card-header { background: #075e54; color: white; border-radius: 15px 15px 0 0 !important; padding: 20px; text-align: center; }
+        .btn-record { border-radius: 50px; padding: 10px 25px; font-weight: bold; transition: 0.3s; }
+        .recording-active { background-color: #dc3545 !important; border-color: #dc3545 !important; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        #audio-preview { width: 100%; margin-top: 15px; border-radius: 10px; display: none; }
+        .submit-btn { background: #25d366; border: none; border-radius: 10px; padding: 15px; font-weight: bold; font-size: 1.1rem; color: white; width: 100%; }
+        .submit-btn:hover { background: #1ebe57; }
+        .form-label { font-weight: 600; color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card main-card">
+                <div class="card-header">
+                    <h3 class="mb-0"><i class="fas fa-pen-nib"></i> Oduu Haaraa Maxxansi</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form id="post-form">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label for="title" class="form-label">Mata-duree Oduu</label>
+                            <input type="text" id="title" class="form-control form-control-lg" placeholder="Mata-duree asitti barreessi..." required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="category" class="form-label">Gosa Oduu (Category)</label>
+                            <select id="category" class="form-select" required>
+                                <option value="">-- Filadhu --</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="content" class="form-label">Qabiyyee Oduu</label>
+                            <textarea id="content" class="form-control" rows="6" placeholder="Waan ta'e bal'inaan asitti barreessi..." required></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="images" class="form-label">Suuraalee Filadhu (Baay'ee danda'ama)</label>
+                            <input type="file" id="images" class="form-control" multiple accept="image/*">
+                            <div id="image-help" class="form-text text-muted small">Suuraa tokkoo ol filachuuf 'Ctrl' qabi.</div>
+                        </div>
+
+                        <div class="p-3 bg-light rounded-3 border mb-4 text-center">
+                            <p class="form-label mb-2"><i class="fas fa-microphone"></i> Oduu kana sagaleen waraabi</p>
+                            <button type="button" id="record-btn" class="btn btn-outline-danger btn-record">
+                                <i class="fas fa-circle"></i> Waraabuu Jalqabi
+                            </button>
+                            <p id="record-status" class="mt-2 text-danger small fw-bold"></p>
+                            <audio id="audio-preview" controls></audio>
+                        </div>
+
+                        <button type="submit" id="submit-btn" class="submit-btn shadow">
+                            <i class="fas fa-paper-plane"></i> MAXXANSI ODUU
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioBlob = null;
+
+    const recordBtn = document.getElementById('record-btn');
+    const statusText = document.getElementById('record-status');
+    const audioPreview = document.getElementById('audio-preview');
+
+    // Logic Waraabbii Sagalee
+    recordBtn.addEventListener('click', async () => {
+        if (!mediaRecorder || mediaRecorder.state === "inactive") {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+                    audioPreview.src = URL.createObjectURL(audioBlob);
+                    audioPreview.style.display = 'block';
+                    statusText.innerText = "Sagaleen waraabamee qophaa'eera! ✅";
+                    recordBtn.innerHTML = '<i class="fas fa-redo"></i> Deebisii Waraab';
+                    recordBtn.classList.remove('recording-active');
+                };
+
+                mediaRecorder.start();
+                recordBtn.innerHTML = '<i class="fas fa-stop"></i> Dhaabi (Waraabaa jira...)';
+                recordBtn.classList.add('recording-active');
+                statusText.innerText = "Sagalee kee dhageessisaa jirta...";
+            } catch (err) {
+                alert("Microphone banuuf hayyama kennaa!");
+            }
+        } else {
+            mediaRecorder.stop();
+        }
+    });
+
+    // Submit Logic
+    document.getElementById('post-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Maxxanfamaa jira...';
+
+        const formData = new FormData();
+        formData.append('title', document.getElementById('title').value);
+        formData.append('content', document.getElementById('content').value);
+        formData.append('category', document.getElementById('category').value);
+        
+        // Suuraalee fe'uu
+        const imageFiles = document.getElementById('images').files;
+        for (let i = 0; i < imageFiles.length; i++) {
+            formData.append('uploaded_images', imageFiles[i]);
+        }
+
+        // Sagalee fe'uu
+        if (audioBlob) {
+            formData.append('voice_audio', audioBlob, 'voice_news.mp3');
+        }
+
+        try {
+            const response = await fetch('/blog/api/posts/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            });
+
+            if (response.ok) {
+                alert("Oduun milkaa'inaan maxxanfameera! ✅");
+                window.location.href = "/blog/"; 
+            } else {
+                alert("Dogoggorri uumameera. Maaloo deebisii yaali.");
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> MAXXANSI ODUU';
+            }
+        } catch (error) {
+            alert("Network Error: Server waliin wal qunnamuun hin danda'amne.");
+            submitBtn.disabled = false;
+        }
+    };
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="om">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAAN-OFII - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background-color: #007bff; }
+        
+        /* Floating Chat Button Effect */
+        .btn-chat { 
+            background-color: #25d366; 
+            color: white; 
+            border-radius: 30px; 
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+        .btn-chat:hover { 
+            background-color: #128c7e; 
+            color: white; 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+        }
+
+        /* Hero Section Styling */
+        .hero-section { 
+            padding: 80px 0; 
+            text-align: center; 
+            background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%); 
+            margin-bottom: 40px; 
+            border-radius: 0 0 100px 100px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        /* Card Hover Effect */
+        .card { 
+            transition: transform 0.3s ease, box-shadow 0.3s ease; 
+            border: none;
+        }
+        .card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1) !important; 
+        }
+
+        .section-icon { margin-right: 10px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-3" href="/"><i class="fas fa-rocket section-icon"></i>WAAN-OFII</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a href="{% url 'chat:lobby' %}" class="btn btn-chat btn-sm px-4 me-3">
+                            <i class="fab fa-whatsapp"></i>(Chat)
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white fw-bold" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=random" width="30" height="30" class="rounded-circle me-1">
+                            {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'account_logout' %}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'account_login' %}">Login</a></li>
+                    <li class="nav-item"><a class="btn btn-light btn-sm ms-2 px-4 shadow-sm" href="{% url 'account_signup' %}">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="hero-section">
+    <div class="container">
+        <h1 class="display-3 fw-bold text-primary mb-3">Baga Gara <span class="text-dark">WAAN-OFII</span> Nagaan Dhufte!</h1>
+        <p class="lead text-muted fs-4">Bakka itti barattu, posts adda addaa dubbiftu fi hiriyoota kee waliin haasoftu.</p>
+        {% if not user.is_authenticated %}
+            <div class="mt-4">
+                <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg px-5 shadow">Barreeffama Jalqabi</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center mb-4">
+                <h3 class="fw-bold mb-0"><i class="fas fa-fire text-danger section-icon"></i>Baay'ee Kan Dubbifaman</h3>
+            </div>
+            <div class="row">
+                {% for post in posts %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <div class="badge bg-primary-soft text-primary mb-2">Post</div>
+                                <h5 class="card-title fw-bold text-dark">{{ post.title }}</h5>
+                                <p class="card-text text-muted small">{{ post.content|truncatechars:120 }}</p>
+                                <a href="#" class="btn btn-link text-primary p-0 fw-bold text-decoration-none">Dubbisi <i class="fas fa-arrow-right small"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-folder-open fa-3x text-light mb-3"></i>
+                        <p class="text-muted">Hammaaf barreeffamni tokkollee hin jiru.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="d-flex align-items-center mb-4">
+                <h3 class="fw-bold mb-0"><i class="fas fa-graduation-cap text-success section-icon"></i>Koorsiiwwan</h3>
+            </div>
+            <div class="list-group shadow-sm border-0">
+                {% for course in courses %}
+                    <a href="#" class="list-group-item list-group-item-action border-0 mb-2 rounded shadow-sm d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-book-open text-muted me-2"></i> {{ course.title }}</span>
+                        <i class="fas fa-chevron-right text-light small"></i>
+                    </a>
+                {% empty %}
+                    <div class="list-group-item text-muted border-0 rounded">Koorsiiwwan hin jiran.</div>
+                {% endfor %}
+            </div>
+
+            <div class="card bg-dark text-white mt-4 overflow-hidden shadow">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold"><i class="fas fa-comments text-success"></i> Marii Garee</h5>
+                    <p class="small opacity-75">Hiriyoota kee waliin garee uumuun mari'adhu.</p>
+                    <a href="{% url 'chat:lobby' %}" class="btn btn-success btn-sm w-100">Gara Chat Deemi</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Navbar auto-close for mobile
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            const navbar = document.querySelector('.navbar-collapse');
+            if (navbar && navbar.classList.contains('show')) {
+                const bsCollapse = new bootstrap.Collapse(navbar);
+                bsCollapse.hide();
+            }
+        });
+    });
+
+    console.log("Waan-ofii Home Loaded Successfully!");
+</script>
+</body>
+</html>

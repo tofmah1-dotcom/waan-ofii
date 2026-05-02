@@ -1,131 +1,143 @@
 import json
 import re
 from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.db import database_sync_to_async
-from .models import Message
+from asgiref.sync import sync_to_async
 from django.contrib.auth.models import User
+
+# Model-oota barbaachisoo ta'an hunda asitti dabalera
+from .models import Message, ChatGroup, GroupMessage, Notification
+
+# Kutaa Profile sirreessuuf:
+try:
+    from accounts.models import Profile  # Migrations keessatti 'accounts' waan jedhuuf
+except ImportError:
+    try:
+        from chat.models import Profile  # Yoo 'chat' keessa jiraate
+    except ImportError:
+        Profile = None # Yoo bakka tokkoyyuu hin jirre
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # 1. Maqaa room URL irraa fiduu
-        raw_room_name = self.scope['url_route']['kwargs']['room_name']
-        
-        # 2. Maqaa garee qulqulleessuu (Space gara sarara - tti)
-        clean_room_name = re.sub(r'[^a-zA-Z0-9._-]', '-', raw_room_name)
-        
-        self.room_name = clean_room_name
-        self.room_group_name = f'chat_{self.room_name}'
+        self.room_name = self.scope['url_route']['kwargs'].get('room_name')
+        self.group_id = self.scope['url_route']['kwargs'].get('group_id')
+        self.user = self.scope["user"]
 
-        # Garee keessa seenuu
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
+        if self.group_id:
+            self.room_group_name = f'chat_group_{self.group_id}'
+        else:
+            # Maqaa room qulqulleessuuf
+            clean_name = re.sub(r'[^a-zA-Z0-9._-]', '', str(self.room_name))
+            self.room_group_name = f'chat_{clean_name}'
+
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
-        # NAMNI TOKKO SEENUU ISAA HUNDAAF BEEKSIISUU (ONLINE STATUS)
-        if self.scope["user"].is_authenticated:
+        # --- ONLINE STATUS: CONNECT ---
+        if self.user.is_authenticated:
+            await self.update_user_status(True)
+            # Miseensota hundaaf notify gochuu
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
-                    'type': 'user_status',
-                    'username': self.scope["user"].username,
+                    'type': 'user_status_broadcast',
+                    'username': self.user.username,
                     'status': 'online'
                 }
             )
 
     async def disconnect(self, close_code):
-        # NAMNI TOKKO BA'UU ISAA BEEKSIISUU (OFFLINE STATUS)
-        if self.scope["user"].is_authenticated:
+        # --- ONLINE STATUS: DISCONNECT ---
+        if self.user.is_authenticated:
+            await self.update_user_status(False)
+            # Miseensota hundaaf notify gochuu
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
-                    'type': 'user_status',
-                    'username': self.scope["user"].username,
+                    'type': 'user_status_broadcast',
+                    'username': self.user.username,
                     'status': 'offline'
                 }
             )
-        
-        # Garee keessaa ba'uu
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
+
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        
-        # 1. TYPING INDICATOR HANDLER
-        if data.get('type') == 'typing':
+        action_type = data.get('type', 'chat_message') 
+        user = self.scope["user"]
+
+        # 1. Ergaa Haaraa Erguuf
+        if action_type == 'chat_message':
+            message = data.get('message', '')
+            image = data.get('image', None)
+            audio = data.get('audio', None)
+            
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
-                    'type': 'chat_typing',
-                    'username': self.scope["user"].username,
-                    'typing': data.get('typing')
+                    'type': 'chat_message_handler',
+                    'message': message,
+                    'username': user.username,
+                    'image': image,
+                    'audio': audio,
+                    'message_id': data.get('message_id', None)
                 }
             )
-            return
 
-        # 2. MESSAGE HANDLER
-        message = data.get('message', '')
-        user = self.scope["user"]
-        username = user.username if user.is_authenticated else "Anonymous"
-        
-        image_url = data.get('image', data.get('image_url'))
-        audio_url = data.get('audio', data.get('audio_url'))
+        # 2. Ergaa Haquuf
+        elif action_type == 'delete_message':
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'delete_message_handler',
+                    'message_id': data.get('message_id')
+                }
+            )
 
-        # Database-tti guduunfuu
-        await self.save_message(user, message, image_url, audio_url)
+        # 3. Ergaa Sirreessuuf
+        elif action_type == 'edit_message':
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'edit_message_handler',
+                    'message_id': data.get('message_id'),
+                    'message': data.get('message')
+                }
+            )
 
-        # Hundaaf Broadcast gochuu
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'message': message,
-                'username': username,
-                'image': image_url,
-                'audio': audio_url,
-            }
-        )
+    # --- HANDLERS ---
 
-    # Ergaa idilee (Message)
-    async def chat_message(self, event):
+    async def chat_message_handler(self, event):
+        await self.send(text_data=json.dumps(event))
+
+    async def delete_message_handler(self, event):
         await self.send(text_data=json.dumps({
-            'type': 'message',
-            'message': event.get('message'),
-            'username': event.get('username'),
-            'image': event.get('image'),
-            'audio': event.get('audio'),
+            'type': 'delete_message',
+            'message_id': event['message_id']
         }))
 
-    # Mallattoo Typing
-    async def chat_typing(self, event):
+    async def edit_message_handler(self, event):
         await self.send(text_data=json.dumps({
-            'type': 'typing',
-            'username': event['username'],
-            'typing': event['typing']
+            'type': 'edit_message',
+            'message_id': event['message_id'],
+            'message': event['message']
         }))
 
-    # Mallattoo Online/Offline
-    async def user_status(self, event):
+    async def user_status_broadcast(self, event):
         await self.send(text_data=json.dumps({
-            'type': 'status',
+            'type': 'user_status',
             'username': event['username'],
             'status': event['status']
         }))
 
-    @database_sync_to_async
-    def save_message(self, user, message, image_url, audio_url):
-        if user.is_authenticated:
-            img_path = image_url.replace('/media/', '') if image_url else None
-            aud_path = audio_url.replace('/media/', '') if audio_url else None
-            
-            Message.objects.create(
-                user=user, 
-                room_name=self.room_name, 
-                content=message,
-                image=img_path,
-                audio=aud_path
-            )
+    @sync_to_async
+    def update_user_status(self, is_online):
+        if Profile is None:
+            return
+        try:
+            # User profile is_online update gochuuf
+            profile = Profile.objects.get(user=self.user)
+            profile.is_online = is_online
+            profile.save()
+        except Exception as e:
+            print(f"Status Update Error: {e}")

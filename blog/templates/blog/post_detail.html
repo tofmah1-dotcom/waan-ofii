@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <h1 class="display-4 mb-3 fw-bold">{{ post.title }}</h1>
+            
+            <div class="text-muted mb-4 d-flex flex-wrap gap-3">
+                <span><i class="fas fa-user text-primary"></i> <strong>{{ post.author.username }}</strong></span>
+                <span><i class="fas fa-calendar-alt text-primary"></i> {{ post.created_at|date:"M d, Y" }}</span>
+                <span class="badge bg-primary text-white p-2 px-3">{{ post.category.name }}</span>
+            </div>
+
+            <hr>
+
+            {% if post.images.all %}
+                <div id="postCarousel" class="carousel slide mb-4 shadow rounded" data-bs-ride="carousel">
+                    <div class="carousel-inner text-center bg-dark rounded">
+                        {% for img in post.images.all %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <img src="{{ img.image.url }}" class="img-fluid" style="max-height: 550px; width: 100%; object-fit: contain;" alt="Oduu Suuraa">
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if post.images.count > 1 %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#postCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#postCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </button>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if post.voice_audio %}
+                <div class="card bg-light border-0 mb-4 shadow-sm">
+                    <div class="card-body py-3">
+                        <h5 class="card-title text-primary mb-3"><i class="fas fa-microphone"></i> Gabaasa Sagalee</h5>
+                        <audio controls class="w-100">
+                            <source src="{{ post.voice_audio.url }}" type="audio/mpeg">
+                            Browser-riin kee audio kana hin fidu.
+                        </audio>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="post-content fs-5 mb-5" style="line-height: 1.9; text-align: justify; color: #333;">
+                {{ post.content|linebreaks }}
+            </div>
+
+            <hr>
+
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <a href="{% url 'blog:post_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Gara Tarree Oduutti
+                </a>
+                {% if post.author == user %}
+                    <a href="{% url 'blog:post_delete' post.slug %}" class="btn btn-danger" onclick="return confirm('Dhuguma oduu kana haquu barbaaddaa?')">
+                        <i class="fas fa-trash"></i> Oduu Haqi
+                    </a>
+                {% endif %}
+            </div>
+
+            <div class="comments-section bg-light p-4 rounded shadow-sm mb-5">
+                <h3 class="mb-4"><i class="fas fa-comments text-primary"></i> Yaada ({ post.comments.count }})</h3>
+                
+                {% if user.is_authenticated %}
+                    <form action="{% url 'blog:add_comment' post.slug %}" method="POST" class="mb-4">
+                        {% csrf_token %}
+                        <div class="form-floating mb-3">
+                            <textarea name="text" class="form-control" id="commentArea" style="height: 100px" placeholder="Yaada kee asitti barreessi..." required></textarea>
+                            <label for="commentArea">Yaada kee asitti barreessi...</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary px-4">Yaada Ergi</button>
+                    </form>
+                {% else %}
+                    <div class="alert alert-info">
+                        Yaada kennuuf maaloo jalqaba <a href="{% url 'account_login' %}" class="fw-bold">Login</a> godhadhu.
+                    </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    {% for comment in post.comments.all %}
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h6 class="fw-bold mb-0 text-primary">@{{ comment.user.username }}</h6>
+                                    <small class="text-muted">{{ comment.created_at|timesince }} dura</small>
+                                </div>
+                                <p class="card-text mb-0">{{ comment.text }}</p>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted italic text-center">Yaanni ammatti hin jiru. Yaada kennuuf jalqabaa ta'i!</p>
+                    {% endfor %}
+                </div>
+            </div>
+            </div>
+    </div>
+</div>
+{% endblock %}
