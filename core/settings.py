@@ -1,20 +1,29 @@
 import os
 from pathlib import Path
 
+# Base Directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# --- NAGEENYAAF ---
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here')
 
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+# Render irratti False akka ta'uuf akkasumas kompiutara keerratti True akka ta'uuf
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# --- 1. MOOBAAYILAAF IP HAARAA ASITTI DABALAMEERA ---
-# IP address 10.153.116.198 lakkofsa 'ipconfig' irraa argatte sana dha
-ALLOWED_HOSTS = ['10.153.116.198', '127.0.0.1', 'localhost', '*', '.railway.app']
+# --- 1. ALLOWED HOSTS (Render fi Moobaayilaaf) ---
+ALLOWED_HOSTS = [
+    'waan-ofii.onrender.com',  # Linkii weebsaaytii keetii isa Render
+    'tofiqo.pythonanywhere.com', 
+    '127.0.0.1', 
+    'localhost', 
+    '10.153.116.198',          # IP Moobaayila keetii
+    '*'                        # Yeroo gabaabaaf hunda akka hayyamuuf
+]
 
-# --- 2. CSRF SETTINGS (Moobaayilaan Login akka siif hojjetuuf) ---
+# --- 2. CSRF SETTINGS ---
 CSRF_TRUSTED_ORIGINS = [
-    'http://10.153.116.198:8000', 
-    'https://*.railway.app'
+    'https://waan-ofii.onrender.com',
+    'http://10.153.116.198:8000'
 ]
 
 # ASGI & WSGI
@@ -32,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     
-    # Apps kee
+    # Apps kee (Source: User Summary)
     'accounts',
     'rest_framework',
     'blog',
@@ -90,7 +99,7 @@ DATABASES = {
     }
 }
 
-# --- 3. STATIC & MEDIA FILES (Mobile irratti akka mul'atan) ---
+# --- 3. STATIC & MEDIA FILES ---
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -101,10 +110,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/chat/' 
-LOGOUT_REDIRECT_URL = '/accounts/login/'
-
-# --- 4. CHANNELS SETTINGS (WebSocket Mobile-f) ---
+# --- 4. CHANNELS SETTINGS ---
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
@@ -117,11 +123,3 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     )
 }
-
-# --- 5. DHUMA IRRATTI SARARA ATI JETTUN DABALAMEERA ---
-ALLOWED_HOSTS = [
-    'tofiqo.pythonanywhere.com', 
-    '127.0.0.1', 
-    'localhost', 
-    '10.153.116.198'  # IP address moobaayila keetiis itti dabalii dhiisi
-]
