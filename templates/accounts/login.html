@@ -1,47 +1,129 @@
-<!DOCTYPE html>
-<html lang="om">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Waan-ofii - Login</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e5ddd5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); width: 350px; text-align: center; }
-        h2 { color: #075e54; margin-bottom: 1.5rem; }
-        
-        /* Form styling */
-        form p { text-align: left; margin-bottom: 15px; }
-        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        
-        .btn-login { width: 100%; padding: 12px; background: #075e54; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; }
-        .btn-login:hover { background: #128c7e; }
-        
-        /* Google Button */
-        .google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px; background: white; border: 1px solid #ccc; border-radius: 5px; text-decoration: none; color: #444; margin-bottom: 20px; transition: 0.3s; }
-        .google-btn:hover { background: #f1f1f1; }
-        
-        .divider { margin: 20px 0; position: relative; border-top: 1px solid #eee; }
-        .divider span { position: absolute; top: -12px; background: white; padding: 0 10px; left: 50%; transform: translateX(-50%); color: #888; font-size: 12px; }
-        
-        .register-link { margin-top: 20px; font-size: 14px; color: #555; }
-        .register-link a { color: #075e54; font-weight: bold; text-decoration: none; }
-    </style>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block title %}Login - Waan-ofii{% endblock %}
+
+{% block content %}
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+    }
+    .login-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+    .login-card h2 {
+        color: #075e54;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+    }
+    /* Google Button Styling */
+    .google-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 12px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #444;
+        font-weight: 600;
+        margin-bottom: 20px;
+        transition: 0.3s;
+    }
+    .google-btn:hover {
+        background: #f8f9fa;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    /* Form Customization */
+    form p {
+        text-align: left;
+        margin-bottom: 1rem;
+    }
+    form input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-top: 5px;
+    }
+    .btn-login {
+        width: 100%;
+        padding: 12px;
+        background: #075e54;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        transition: 0.3s;
+        margin-top: 10px;
+    }
+    .btn-login:hover {
+        background: #128c7e;
+    }
+    .divider {
+        margin: 25px 0;
+        position: relative;
+        border-top: 1px solid #eee;
+    }
+    .divider span {
+        position: absolute;
+        top: -12px;
+        background: white;
+        padding: 0 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #888;
+        font-size: 13px;
+    }
+    .register-link {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #666;
+    }
+    .register-link a {
+        color: #075e54;
+        font-weight: bold;
+        text-decoration: none;
+    }
+</style>
+
+<div class="login-container">
     <div class="login-card">
         <h2>Waan-ofii</h2>
+        <p class="text-muted mb-4">Hojii kee itti fufuuf sign-in godhi.</p>
 
-        {% load socialaccount %}
+        <!-- Google Login -->
         <a href="{% provider_login_url 'google' %}" class="google-btn">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="20" alt="G">
-            Google-iin seeni
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="22" alt="G">
+            Google-iin Seeni
         </a>
 
         <div class="divider"><span>Yookaan</span></div>
 
-        <form method="post">
+        <!-- Manual Login Form -->
+        <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="alert alert-danger p-2 small">
+                    Username ykn Password dogoggora!
+                </div>
+            {% endif %}
+
             {{ form.as_p }}
+            
             <button type="submit" class="btn-login">Gali</button>
         </form>
 
@@ -49,5 +131,5 @@
             Account hin qabduu? <a href="/register/">Asitti uumi</a>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

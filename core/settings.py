@@ -20,12 +20,17 @@ ALLOWED_HOSTS = [
     '*'                        # Yeroo gabaabaaf hunda akka hayyamuuf
 ]
 
-# --- 2. CSRF SETTINGS ---
 CSRF_TRUSTED_ORIGINS = [
     'https://waan-ofii.onrender.com',
-    'http://10.153.116.198:8000'
+    'https://*.onrender.com',  # Inni kun subdomain hunda dabalata
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
 ]
 
+# Nageenya dabalataaf (Production irratti murteessaa dha)
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = True
 # ASGI & WSGI
 ASGI_APPLICATION = 'core.asgi.application'
 WSGI_APPLICATION = 'core.wsgi.application'
