@@ -7,20 +7,20 @@
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome (Icons-f) -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         :root {
-            --primary-color: #075E54; /* Bifa WhatsApp fakkaatu */
+            --primary-color: #075E54;
             --secondary-color: #128C7E;
+            --ai-color: #34b7f1; /* Bifa Chatbot adda baasu */
         }
         body {
             background-color: #ece5dd;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow-x: hidden; /* Moobaayila irratti gara cinaatti akka hin sochoone */
+            overflow-x: hidden;
         }
-        /* Navbar bareedaa moobaayilaaf */
         .navbar {
             background-color: var(--primary-color) !important;
             padding: 10px 15px;
@@ -28,30 +28,30 @@
             top: 0;
             z-index: 1000;
         }
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.4rem;
-        }
-        /* Dashboard Cards (WhatsApp Style) */
+        .navbar-brand { font-weight: bold; font-size: 1.4rem; }
+
+        /* Dashboard Cards */
         .app-link-card {
             background: white;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             text-decoration: none;
             color: #333;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            border-left: 5px solid transparent;
             transition: 0.2s;
         }
-        .app-link-card:active {
-            background-color: #f0f0f0;
-            transform: scale(0.98);
-        }
+        .app-link-card:active { transform: scale(0.97); background-color: #f9f9f9; }
+        
+        /* Chatbot Card Border */
+        .ai-border { border-left: 5px solid var(--ai-color); }
+
         .icon-box {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             background-color: var(--secondary-color);
             color: white;
@@ -59,14 +59,31 @@
             align-items: center;
             justify-content: center;
             margin-right: 15px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
-        /* Mobile Content Area */
-        .main-content {
-            padding: 15px;
-            max-width: 600px; /* Moobaayilaaf dhiphisne */
-            margin: 0 auto;
+
+        /* Floating AI Button */
+        .ai-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--ai-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            text-decoration: none;
+            z-index: 999;
+            transition: 0.3s;
         }
+        .ai-fab:hover { transform: scale(1.1); color: white; }
+
+        .main-content { padding: 15px; max-width: 600px; margin: 0 auto; }
     </style>
 </head>
 <body>
@@ -83,24 +100,14 @@
             
             <div class="collapse navbar-collapse" id="mobileMenu">
                 <ul class="navbar-nav pt-3">
-                    <li class="nav-item mb-2">
-                        <a class="nav-link" href="/chat/"><i class="fas fa-comments me-2"></i> Chat App</a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link" href="/blog/"><i class="fas fa-newspaper me-2"></i> Community Blog</a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link" href="/education/"><i class="fas fa-book-reader me-2"></i> Education</a>
-                    </li>
+                    <li class="nav-item mb-2"><a class="nav-link" href="/chat/"><i class="fas fa-comments me-2"></i> Chat App</a></li>
+                    <li class="nav-item mb-2"><a class="nav-link" href="/ai-assistant/"><i class="fas fa-robot me-2"></i> Waan-ofii AI</a></li>
+                    <li class="nav-item mb-2"><a class="nav-link" href="/blog/"><i class="fas fa-newspaper me-2"></i> Community Blog</a></li>
                     <hr class="text-white">
                     {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link text-danger" href="/accounts/logout/"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
-                        </li>
+                        <li class="nav-item"><a class="nav-link text-danger" href="/accounts/logout/"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link text-info" href="/accounts/login/"><i class="fas fa-sign-in-alt me-2"></i> Login</a>
-                        </li>
+                        <li class="nav-item"><a class="nav-link text-info" href="/accounts/login/"><i class="fas fa-sign-in-alt me-2"></i> Login</a></li>
                     {% endif %}
                 </ul>
             </div>
@@ -110,10 +117,18 @@
     <!-- Main Section -->
     <div class="main-content">
         {% block content %}
-        <!-- Dashboard if User is Logged In -->
         {% if user.is_authenticated %}
-            <h4 class="mb-3 fw-bold">Baga Nagaan Dhufte, {{ user.username }}!</h4>
+            <h5 class="mb-4 fw-bold">Akkam ree, {{ user.username }}?</h5>
             
+            <!-- AI Assistant Card (Primary Placement) -->
+            <a href="/ai-assistant/" class="app-link-card ai-border">
+                <div class="icon-box" style="background-color: var(--ai-color);"><i class="fas fa-robot"></i></div>
+                <div>
+                    <h6 class="mb-0 fw-bold">Waan-ofii AI</h6>
+                    <small class="text-muted">Gargaara kee isa dhuunfaa</small>
+                </div>
+            </a>
+
             <a href="/chat/" class="app-link-card">
                 <div class="icon-box"><i class="fas fa-comment-dots"></i></div>
                 <div>
@@ -126,17 +141,15 @@
                 <div class="icon-box" style="background-color: #34b7f1;"><i class="fas fa-rss"></i></div>
                 <div>
                     <h6 class="mb-0 fw-bold">Community Blog</h6>
-                    <small class="text-muted">Oduu fi odeeffannoo haaraa</small>
+                    <small class="text-muted">Odeeffannoo haaraa dubbisi</small>
                 </div>
             </a>
 
-            <a href="/education/" class="app-link-card">
-                <div class="icon-box" style="background-color: #25d366;"><i class="fas fa-graduation-cap"></i></div>
-                <div>
-                    <h6 class="mb-0 fw-bold">Education</h6>
-                    <small class="text-muted">Barnoota garaagaraa hordofi</small>
-                </div>
+            <!-- Floating Button for AI -->
+            <a href="/ai-assistant/" class="ai-fab d-md-none">
+                <i class="fas fa-robot"></i>
             </a>
+
         {% else %}
             <div class="text-center mt-5">
                 <h3>Waan-ofii Community</h3>
