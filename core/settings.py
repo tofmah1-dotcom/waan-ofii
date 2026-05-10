@@ -5,36 +5,32 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- NAGEENYAAF ---
+# Secret key iccitii ta'uu qaba
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here')
 
-# Render irratti False akka ta'uuf akkasumas kompiutara keerratti True akka ta'uuf
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+# 1. Debug dhaamsi (Production irratti False ta'uu qaba)
+DEBUG = False
 
-# --- 1. ALLOWED HOSTS (Render fi Moobaayilaaf) ---
+# 2. Host-oota hayyamaman qofa galchi
 ALLOWED_HOSTS = [
-    'waan-ofii.onrender.com',  # Linkii weebsaaytii keetii isa Render
-    'tofiqo.pythonanywhere.com', 
-    '127.0.0.1', 
+    'waan-ofii.onrender.com', 
     'localhost', 
-    '10.153.116.198',          # IP Moobaayila keetii
-    '*'                        # Yeroo gabaabaaf hunda akka hayyamuuf
+    '127.0.0.1'
 ]
 
+# 3. Nageenya dabalataa (Production irratti murteessaa dha)
 CSRF_TRUSTED_ORIGINS = [
     'https://waan-ofii.onrender.com',
-    'https://*.onrender.com',  # Inni kun subdomain hunda dabalata
-    'http://127.0.0.1:8000',
-    'http://localhost:8000',
+    'https://*.onrender.com',
 ]
 
-# Nageenya dabalataaf (Production irratti murteessaa dha)
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
 CSRF_COOKIE_HTTPONLY = True
-# ASGI & WSGI
-ASGI_APPLICATION = 'core.asgi.application'
-WSGI_APPLICATION = 'core.wsgi.application'
 
+# --- APPS & MIDDLEWARE ---
 INSTALLED_APPS = [
     'daphne', 
     'channels',
@@ -46,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     
-    # Apps kee (Source: User Summary)
+    # Apps kee
     'accounts',
     'rest_framework',
     'base',
@@ -61,16 +57,9 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
 ]
 
-SITE_ID = 1
-
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', 
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Static files Render irratti akka hojjetaniif
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -98,6 +87,10 @@ TEMPLATES = [
     },
 ]
 
+WSGI_APPLICATION = 'core.wsgi.application'
+ASGI_APPLICATION = 'core.asgi.application'
+
+# --- DATABASE ---
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -105,18 +98,20 @@ DATABASES = {
     }
 }
 
-# --- 3. STATIC & MEDIA FILES ---
+# --- STATIC & MEDIA FILES ---
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# WhiteNoise storage Static files hunda walitti qabuuf
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+SITE_ID = 1
 
-# --- 4. CHANNELS SETTINGS ---
+# --- CHANNELS & REST FRAMEWORK ---
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
@@ -129,3 +124,9 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     )
 }
+
+# Authentication
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
