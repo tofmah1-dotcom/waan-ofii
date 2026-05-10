@@ -4,14 +4,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 # ASITTI: 'from chat import views' dabaluun si hin barbaachisu yoo karaa RedirectView deemte
-
- urlpatterns = [
+urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('base.urls')), # Inni kun kallaattiin gara base/urls.py deema
-    path('chat/', include('chat.urls')),
+    path('', include('base.urls')), 
+    path('chat/', include('chat.urls')), 
     path('blog/', include('blog.urls')),
     path('accounts/', include('allauth.urls')),
-    path('education/', include('education.urls'))
+     path('education/', include('education.urls'))
 ]
 # 5. Multimedia fi Static Files
 if settings.DEBUG:

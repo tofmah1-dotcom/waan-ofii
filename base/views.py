@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
 from .models import Product, Category
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required # Inni kun murteessaa dha
 
 def home_view(request):
-    query = request.GET.get('q') # Barbaachaaf
+    query = request.GET.get('q')
     if query:
-        # Meeshaa maqaan ykn ibsa isaan barbaaduu
         products = Product.objects.filter(
             Q(name__icontains=query) | Q(description__icontains=query)
         )
@@ -19,9 +19,9 @@ def home_view(request):
         'query': query
     })
 
+@login_required # Namni Login yoo godhe qofa meeshaa fe'uu danda'a
 def upload_product(request):
     if request.method == "POST":
-        # Form irraa data sassaabuu
         name = request.POST.get('name')
         price = request.POST.get('price')
         description = request.POST.get('description')
@@ -29,6 +29,7 @@ def upload_product(request):
         phone = request.POST.get('phone')
         image = request.FILES.get('image')
         
+        # Meeshaa uumuu
         Product.objects.create(
             seller=request.user,
             name=name,
@@ -38,5 +39,6 @@ def upload_product(request):
             phone_number=phone,
             image=image
         )
-        return redirect('/')
+        return redirect('home') # Gara home-tti si deebisa
+        
     return render(request, 'base/upload.html')
