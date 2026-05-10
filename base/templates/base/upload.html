@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card border-0 shadow-sm p-4" style="border-radius: 20px; background: white;">
+    <h5 class="fw-bold mb-4 text-center">Meeshaa Gurguri</h5>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label small fw-bold">Maqaa Meeshaa</label>
+            <input type="text" name="name" class="form-control rounded-pill border-light bg-light" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label small fw-bold">Gatii (ETB)</label>
+            <input type="number" name="price" class="form-control rounded-pill border-light bg-light" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label small fw-bold">Iddoo (Location)</label>
+            <input type="text" name="location" class="form-control rounded-pill border-light bg-light" placeholder="Fkn: Harar" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label small fw-bold">Lakk. Bilbilaa</label>
+            <input type="text" name="phone" class="form-control rounded-pill border-light bg-light" required>
+        </div>
+        <div class="mb-4">
+            <label class="form-label small fw-bold">Suuraa Meeshaa</label>
+            <input type="file" name="image" class="form-control border-light bg-light" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-bold">FE'I (UPLOAD)</button>
+    </form>
+</div>
+{% endblock %}
