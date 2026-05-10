@@ -5,16 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{% block title %}Waan-ofii{% endblock %}</title>
     
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         :root {
             --primary-color: #075E54;
             --secondary-color: #128C7E;
-            --ai-color: #34b7f1; /* Bifa Chatbot adda baasu */
+            --ai-color: #34b7f1;
         }
         body {
             background-color: #ece5dd;
@@ -23,12 +21,23 @@
         }
         .navbar {
             background-color: var(--primary-color) !important;
-            padding: 10px 15px;
+            padding: 8px 15px;
             position: sticky;
             top: 0;
             z-index: 1000;
         }
-        .navbar-brand { font-weight: bold; font-size: 1.4rem; }
+        .navbar-brand { font-weight: bold; font-size: 1.3rem; }
+
+        /* Search Bar Styling */
+        .search-container {
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+        }
+        .search-input {
+            border-radius: 20px;
+            border: none;
+            padding: 8px 15px;
+        }
 
         /* Dashboard Cards */
         .app-link-card {
@@ -41,13 +50,12 @@
             text-decoration: none;
             color: #333;
             box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-            border-left: 5px solid transparent;
             transition: 0.2s;
         }
         .app-link-card:active { transform: scale(0.97); background-color: #f9f9f9; }
         
-        /* Chatbot Card Border */
         .ai-border { border-left: 5px solid var(--ai-color); }
+        .product-border { border-left: 5px solid #ff9800; }
 
         .icon-box {
             width: 45px;
@@ -79,30 +87,36 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             text-decoration: none;
             z-index: 999;
-            transition: 0.3s;
         }
-        .ai-fab:hover { transform: scale(1.1); color: white; }
 
         .main-content { padding: 15px; max-width: 600px; margin: 0 auto; }
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-dark shadow">
+    <nav class="navbar navbar-dark shadow-sm">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">
-                <i class="fas fa-users-cog me-2"></i> WAAN-OFII
+                <i class="fas fa-users-cog me-1"></i> WAAN-OFII
             </a>
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
             
+            <div class="d-flex align-items-center">
+                {% if user.is_authenticated %}
+                    <a href="/upload/" class="text-white me-3 text-decoration-none">
+                        <i class="fas fa-plus-circle fa-lg"></i>
+                    </a>
+                {% endif %}
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+
             <div class="collapse navbar-collapse" id="mobileMenu">
                 <ul class="navbar-nav pt-3">
+                    <li class="nav-item mb-2"><a class="nav-link" href="/"><i class="fas fa-home me-2"></i> Mana</a></li>
                     <li class="nav-item mb-2"><a class="nav-link" href="/chat/"><i class="fas fa-comments me-2"></i> Chat App</a></li>
                     <li class="nav-item mb-2"><a class="nav-link" href="/ai-assistant/"><i class="fas fa-robot me-2"></i> Waan-ofii AI</a></li>
-                    <li class="nav-item mb-2"><a class="nav-link" href="/blog/"><i class="fas fa-newspaper me-2"></i> Community Blog</a></li>
+                    <li class="nav-item mb-2"><a class="nav-link" href="/blog/"><i class="fas fa-newspaper me-2"></i> Blog</a></li>
                     <hr class="text-white">
                     {% if user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link text-danger" href="/accounts/logout/"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
@@ -114,13 +128,26 @@
         </div>
     </nav>
 
-    <!-- Main Section -->
+    <div class="search-container shadow-sm">
+        <form action="/" method="GET" class="d-flex">
+            <input name="q" class="form-control search-input" type="search" placeholder="Meeshaa ykn oduu barbaadi..." value="{{ query|default:'' }}">
+            <button class="btn text-white ms-1" type="submit"><i class="fas fa-search"></i></button>
+        </form>
+    </div>
+
     <div class="main-content">
         {% block content %}
         {% if user.is_authenticated %}
-            <h5 class="mb-4 fw-bold">Akkam ree, {{ user.username }}?</h5>
+            <h6 class="mb-3 fw-bold text-muted text-uppercase" style="font-size: 0.8rem;">Tajaajiloota</h6>
             
-            <!-- AI Assistant Card (Primary Placement) -->
+            <a href="/upload/" class="app-link-card product-border">
+                <div class="icon-box" style="background-color: #ff9800;"><i class="fas fa-shopping-bag"></i></div>
+                <div>
+                    <h6 class="mb-0 fw-bold">Meeshaa Gurguri</h6>
+                    <small class="text-muted">Suuraa fi gatii galchi</small>
+                </div>
+            </a>
+
             <a href="/ai-assistant/" class="app-link-card ai-border">
                 <div class="icon-box" style="background-color: var(--ai-color);"><i class="fas fa-robot"></i></div>
                 <div>
@@ -137,15 +164,6 @@
                 </div>
             </a>
 
-            <a href="/blog/" class="app-link-card">
-                <div class="icon-box" style="background-color: #34b7f1;"><i class="fas fa-rss"></i></div>
-                <div>
-                    <h6 class="mb-0 fw-bold">Community Blog</h6>
-                    <small class="text-muted">Odeeffannoo haaraa dubbisi</small>
-                </div>
-            </a>
-
-            <!-- Floating Button for AI -->
             <a href="/ai-assistant/" class="ai-fab d-md-none">
                 <i class="fas fa-robot"></i>
             </a>
@@ -160,7 +178,6 @@
         {% endblock %}
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
