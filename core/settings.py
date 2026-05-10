@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     # Apps kee (Source: User Summary)
     'accounts',
     'rest_framework',
+    'base',
     'blog',
     'chat',
     'education',
