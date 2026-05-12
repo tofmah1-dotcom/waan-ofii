@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here')
 
 # 1. Debug dhaamsi (Production irratti False ta'uu qaba)
-DEBUG = False
+DEBUG = true
 
 # 2. Host-oota hayyamaman qofa galchi
 ALLOWED_HOSTS = [
